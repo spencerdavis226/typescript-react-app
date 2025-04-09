@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, {
+  Children,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import './App.css';
 
 const Heading = ({ title }: { title: string }) => {
@@ -50,6 +57,20 @@ type ActionType =
   | { type: 'ADD'; text: string }
   | { type: 'REMOVE'; id: number };
 
+const useNumber = (initialValue: number) => useState<number>(initialValue);
+
+type UseNumberValue = ReturnType<typeof useNumber>[0];
+type UseNumberSetValue = ReturnType<typeof useNumber>[1];
+
+const Incrementer: React.FC<{
+  value: UseNumberValue;
+  setValue: UseNumberSetValue;
+}> = ({ value, setValue }) => {
+  return <button onClick={() => setValue(value + 1)}>Add - {value}</button>;
+};
+
+const Button: React.FC<> = ({ children }) => <button>{children}</button>;
+
 function App() {
   const onListClick = useCallback((item: string) => {
     alert(item);
@@ -98,12 +119,15 @@ function App() {
     }
   }, []);
 
+  const [value, setValue] = useNumber(0);
+
   return (
     <div>
       <Heading title="Introduction" />
       <Box>Hello there</Box>
       <List items={['one', 'two', 'three']} onClick={onListClick} />
       <Box>{JSON.stringify(payload)}</Box>
+      <Incrementer value={value} setValue={setValue} />
 
       <Heading title="Todos" />
       {todos.map((todo) => (
