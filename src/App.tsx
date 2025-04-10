@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from 'react';
 import './App.css';
-import { useTodos } from './useTodos';
+import { useTodos, useAddTodo, useRemoveTodo, TodosProvider } from './useTodos';
 
 const Heading = ({ title }: { title: string }) => {
   return <h2>{title}</h2>;
@@ -19,10 +19,27 @@ const Box = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+function UL<T>({
+  items,
+  render,
+}: {
+  items: T[];
+  render: (item: T) => React.ReactNode;
+}) {
+  return (
+    <ul>
+      {items.map((item, index) => (
+        <li key={index}>{render(item)}</li>
+      ))}
+    </ul>
+  );
+}
+
 function App() {
-  const { todos, addTodo, removeTodo } = useTodos([
-    { id: 0, text: 'Hey there!', done: false },
-  ]);
+  const todos = useTodos();
+  const addTodo = useAddTodo();
+  const removeTodo = useRemoveTodo();
+
   const newTodoRef = useRef<HTMLInputElement>(null);
 
   const onAddTodo = useCallback(() => {
@@ -31,22 +48,6 @@ function App() {
       newTodoRef.current.value = '';
     }
   }, [addTodo]);
-
-  function UL<T>({
-    items,
-    render,
-  }: {
-    items: T[];
-    render: (item: T) => React.ReactNode;
-  }) {
-    return (
-      <ul>
-        {items.map((item, index) => (
-          <li key={index}>{render(item)}</li>
-        ))}
-      </ul>
-    );
-  }
 
   return (
     <div>
@@ -72,4 +73,27 @@ function App() {
   );
 }
 
-export default App;
+const JustShowTodos = () => {
+  const todos = useTodos();
+  return <UL items={todos} render={(todo) => <>{todo.text}</>} />;
+};
+
+const AppWrapper = () => {
+  return (
+    <TodosProvider
+      initialTodos={[{ id: 0, text: 'Hey there useContext!', done: false }]}
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '50% 50%',
+        }}
+      >
+        <App />
+        <JustShowTodos />
+      </div>
+    </TodosProvider>
+  );
+};
+
+export default AppWrapper;
